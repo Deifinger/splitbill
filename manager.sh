@@ -49,10 +49,10 @@ readonly _LARADOCK_ENV_EXAMPLE_FILEPATH=${_LARADOCK_DIRPATH}/${_LARADOCK_ENV_EXA
 readonly LARADOCK_REPO="git@github.com:laradock/laradock.git"
 readonly LARADOCK_REPO_TAG="v7.15"
 
-readonly DOCKER_SERVICES="nginx postgres workspace"
-
 readonly WORKSPACE_SERVICE_NAME="workspace"
 readonly PRIMARY_DB_SERVICE_NAME="postgres"
+
+readonly DOCKER_SERVICES="roadrunner ${PRIMARY_DB_SERVICE_NAME} ${WORKSPACE_SERVICE_NAME}"
 
 readonly PHP_DEBUG_MODE="php -dxdebug.remote_enable=1 -dxdebug.remote_mode=req -dxdebug.remote_port=9000 -dxdebug.remote_host=172.17.0.1"
 
@@ -75,6 +75,12 @@ Usage: ./$(basename "$0") command [OPTION]...
     workspace | ws [OPTION]...   Runs workspace docker container under root user
          OPTIONS:                Use any option or command for workspace container
 
+    laradock | ld [OPTION]...    Works with laradock. Don't work without options
+         OPTIONS:
+         refresh                 Copies '.laradock' changes to 'laradock' directory
+         refresh container       The same as 'refresh', but after updating 'laradock' directory
+                                 does rebuilding docker container image and forces recreating container
+
     artisan | art [OPTION]...         Launches artisan inside workspace docker container under laradock user
          OPTIONS:                     Use any option or command for artisan
 
@@ -89,10 +95,15 @@ Usage: ./$(basename "$0") command [OPTION]...
 
     mysql | mql                  Connects to MySQL docker container
 
+    roadrunner [OPTION]...       Connects to RoadRunner docker container and works with commands.sh file
+         reset-workers           Resets RoadRunner workers
+         show-workers            Shows RoadRunner workers
+         watch                   Watches changes in php files and refreshes them in RoadRunner
+
     dc | docker [OPTION]...      Runs docker-compose in laradock directory
          OPTIONS:                Use any option or command for docker-compose
                                  OR use next predefined options for most use-cases
-         up                      up -d $DOCKER_SERVICES
+         up                      up -d ${DOCKER_SERVICES}
          clear                   rm -s
 
     -h | --help                  Usage tips
@@ -186,7 +197,6 @@ docker_compose() {
   local f_arg="$1"
   local args="$@"
 
-
   case "$f_arg" in
       up )    args="up -d ${DOCKER_SERVICES}" ;;
       clear ) args="rm -s" ;;
@@ -194,6 +204,34 @@ docker_compose() {
 
   cd ${LARADOCK_DIRPATH}
   docker-compose ${args}
+}
+
+laradock() {
+  local arg1="$1"
+  local arg2=""
+
+  [[ $# -eq 2 ]] && arg2="$2"
+
+  case "${arg1}" in
+      refresh ) laradock_refresh "${arg2}";;
+  esac
+}
+
+laradock_refresh() {
+  local container="$1"
+
+  init_laradock
+
+  if [[ "${container}" != "" ]]; then
+    docker_compose build "${container}"
+    docker_compose up -d --force-recreate "${container}"
+  fi
+}
+
+roadrunner() {
+  local args="$@"
+
+  docker_compose exec roadrunner bash /etc/roadrunner/commands.sh "${args}"
 }
 
 mysql() {
@@ -290,12 +328,14 @@ main() {
   case "$rule" in
     init )                init; exit ;;
     workspace | ws )      workspace_as_root "$args"; exit ;;
+    laradock | ld )       laradock ${args}; exit ;;
     artisan | art )       artisan "$args"; exit ;;
     artisan_debug | artd ) artisan_debug "$args"; exit ;;
     composer | cmp )      composer "$args"; exit ;;
     npm )                 npm "$args"; exit ;;
     mysql | mql )         mysql; exit ;;
     dc | docker )         docker_compose "$args"; exit ;;
+    roadrunner | ld )     roadrunner "$args"; exit ;;
     -h | --help )         usage; exit ;;
     * )                   usage; exit 1 ;;
   esac
