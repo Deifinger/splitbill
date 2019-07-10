@@ -1,10 +1,16 @@
 version: 2.1
 
-jobs:
-  build:
+executors:
+  default_php_exec:
     docker:
       - image: circleci/php:7.3-node-browsers
     working_directory: ~/code
+    environment:
+      ENV: ci
+
+jobs:
+  build:
+    executor: default_php_exec
     steps:
       - checkout
       - run:
@@ -71,3 +77,8 @@ jobs:
 #          path: tests/_output
 #      - store_artifacts:
 #          path: tests/_output
+
+workflows:
+  build:
+    jobs:
+      - build
