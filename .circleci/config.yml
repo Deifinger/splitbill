@@ -1,9 +1,73 @@
 version: 2.1
 
-orbs:
-  hello: circleci/hello-build@0.0.7 # uses the circleci/buildpack-deps Docker image
+jobs:
+  build:
+    docker:
+      - image: circleci/php:7.3-node-browsers
+    working_directory: ~/code
+    steps:
+      - checkout
+      - run:
+          name: Install PHP libzip-dev
+          command: sudo apt install -y zlib1g-dev
+      - run:
+          name: Install zip package for PHP
+          command: sudo docker-php-ext-install zip
+      - run:
+          name: Update composer to latest version
+          command: sudo composer self-update
 
-workflows:
-  "Hello Workflow":
-    jobs:
-      - hello/hello-build
+      - restore_cache:
+          keys:
+            - composer-v1-{{ checksum "composer.lock" }}
+            # fallback to using the latest cache if no exact match is found (See https://circleci.com/docs/2.0/caching/)
+            - composer-v1-
+      - run:
+          name: Install Composer packages
+          command: composer install -n --prefer-dist
+      - save_cache:
+          key: composer-v1-{{ checksum "composer.lock" }}
+          paths:
+            - vendor
+
+      - restore_cache:
+          keys:
+            - node-v1-{{ checksum "package.json" }}
+            # fallback to using the latest cache if no exact match is found (See https://circleci.com/docs/2.0/caching/)
+            - node-v1-
+      - run:
+          name: Install NodeJS packages
+          command: yarn install
+      - save_cache:
+          key: node-v1-{{ checksum "package.json" }}
+          paths:
+            - node_modules
+
+#      - run:
+#          name: Migrate Laravel Database
+#          command: php artisan migrate --env=testing --force
+
+#      - run:
+#          name: Compile Javascript & CSS for Browser Testing
+#          command: npm run production
+#
+#      - run:
+#          name: Start Chrome Driver
+#          command: ./vendor/laravel/dusk/bin/chromedriver-linux
+#          background: true
+#
+#      - run:
+#          name: Run Laravel Server
+#          command: php artisan serve
+#          background: true
+
+      - run:
+          name: Test 1 - Run Phpunit for Server-Side HTTP Requests & PHP Unit Testing
+          command: ./vendor/bin/phpunit
+
+#      - run: ./vendor/bin/codecept build
+#      - run: ./vendor/bin/codecept run --xml result.xml
+#      - store_test_results:
+#          path: tests/_output
+#      - store_artifacts:
+#          path: tests/_output
