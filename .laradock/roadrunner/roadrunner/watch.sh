@@ -7,5 +7,5 @@ grep '\.php$' --line-buffered |
 grep -v '^/var/www/vendor/' --line-buffered |
 while read -r directory events filename; do
   echo "${events}: ${directory}${filename}"
-  rr -c /etc/roadrunner/.rr.yaml http:reset
+  rr -c /etc/roadrunner/.rr.local.yml http:reset
 done
