@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Application\Providers;
+namespace Framework\Providers;
 
 use Illuminate\Support\Facades\Event;
 use Illuminate\Auth\Events\Registered;
