@@ -4,32 +4,50 @@ namespace App\Domain\User\Model;
 
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * Class User
+ *
+ * @property string name
+ * @property string created_at
+ * @property string updated_at
+ *
+ * @package App\Domain\User\Model
+ */
 class User extends Model
 {
+    public const FIELD_NAME = 'name';
+
     /**
      * The attributes that are mass assignable.
      *
      * @var array
      */
     protected $fillable = [
-        'name', 'email', 'password',
+        'name'
     ];
 
     /**
-     * The attributes that should be hidden for arrays.
-     *
-     * @var array
+     * @var bool
      */
-    protected $hidden = [
-        'password', 'remember_token',
-    ];
+    public $timestamps = true;
+
+    /* --------------------------------------------------------------------------------
+     * Setters/Getters
+     * -------------------------------------------------------------------------------- */
 
     /**
-     * The attributes that should be cast to native types.
-     *
-     * @var array
+     * @return string
      */
-    protected $casts = [
-        'email_verified_at' => 'datetime',
-    ];
+    public function getNameAttribute(): string
+    {
+        return $this->attributes[self::FIELD_NAME];
+    }
+
+    /**
+     * @param string $name
+     */
+    public function setNameAttribute(string $name): void
+    {
+        $this->attributes[self::FIELD_NAME] = $name;
+    }
 }
