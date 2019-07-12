@@ -22,7 +22,8 @@
         "mockery/mockery": "^1.2",
         "nunomaduro/collision": "^3.0",
         "phpunit/phpunit": "^7.5",
-        "roave/security-advisories": "dev-master"
+        "roave/security-advisories": "dev-master",
+        "phpmd/phpmd" : "@stable"
     },
     "config": {
         "optimize-autoloader": true,
