@@ -70,7 +70,9 @@ jobs:
 
       - run:
           name: Test 1 - Run Phpunit for Server-Side HTTP Requests & PHP Unit Testing
-          command: cd src && vendor/bin/phpunit
+          command: cd src && phpdbg -qrr vendor/bin/phpunit --coverage-html build/coverage-report
+      - store_artifacts:
+          path:  build/coverage-report
 
 #      - run: ./vendor/bin/codecept build
 #      - run: ./vendor/bin/codecept run --xml result.xml
