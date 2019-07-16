@@ -8,7 +8,7 @@ use PHPUnit\Framework\TestCase;
 
 /**
  * Class ConfigRepositoryTest
- * @covers LaravelConfigRepositoryAdapter
+ * @covers \App\Utils\FrameworkAdapters\Config\LaravelConfigRepositoryAdapter
  * @package Tests\Unit\Utils\FrameworkAdapters\Config
  */
 class LaravelConfigRepositoryAdapterTest extends TestCase
