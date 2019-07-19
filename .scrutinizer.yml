@@ -1,0 +1,43 @@
+build:
+  environment:
+    php:
+      version: 7.3.4
+
+  cache:
+    directories:
+      - vendor/
+      - ~/.composer/cache
+
+  dependencies:
+    before:
+      - composer self-update
+      - cd src && composer install --prefer-source --no-interaction
+
+  nodes:
+    coverage:
+      tests:
+        override:
+          - command: './vendor/bin/phpunit --coverage-clover=coverage.clover'
+            coverage:
+              file: 'src/coverage.clover'
+              format: 'clover'
+
+checks:
+  php:
+    code_rating: true
+    duplication: true
+    security_vulnerabilities: true
+
+filter:
+  paths: ["src/*"]
+  excluded_paths:
+    - 'src/views/*'
+    - 'src/config/*'
+    - 'src/database/*'
+    - 'src/tests/*'
+    - 'src/vendor/*'
+
+  dependency_paths:
+    - src/vendor/
+
+coding_style: { }
