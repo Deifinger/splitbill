@@ -50,6 +50,10 @@ jobs:
           paths:
             - src/node_modules
 
+      - run:
+          name: Analyze code by PHPStan
+          command: cd src && php artisan code:analyse
+
 #      - run:
 #          name: Migrate Laravel Database
 #          command: php artisan migrate --env=testing --force
@@ -68,9 +72,11 @@ jobs:
 #          command: php artisan serve
 #          background: true
 
-      - run:
-          name: Test 1 - Run Phpunit for Server-Side HTTP Requests & PHP Unit Testing
-          command: cd src && vendor/bin/phpunit
+#      - run:
+#          name: Test 1 - Run Phpunit for Server-Side HTTP Requests & PHP Unit Testing
+#          command: cd src && phpdbg -qrr vendor/bin/phpunit --coverage-html build/coverage-report
+#      - store_artifacts:
+#          path:  src/build/coverage-report
 
 #      - run: ./vendor/bin/codecept build
 #      - run: ./vendor/bin/codecept run --xml result.xml
